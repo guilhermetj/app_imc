@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:imcapp/pages/main_page.dart';
+import 'package:imcapp/model/imc.dart';
+import 'package:imcapp/repositories/imc_repository.dart';
 
 class AdicionarImcPage extends StatefulWidget {
-  const AdicionarImcPage({super.key});
+  final ImcRepository imcRepository;
+  final VoidCallback atualizarListaImc;
+
+  const AdicionarImcPage({
+    Key? key,
+    required this.imcRepository,
+    required this.atualizarListaImc,
+  }) : super(key: key);
 
   @override
   State<AdicionarImcPage> createState() => _AdicionarImcPageState();
 }
 
 class _AdicionarImcPageState extends State<AdicionarImcPage> {
+  TextEditingController alturaController = TextEditingController();
+  TextEditingController pesoController = TextEditingController();
+  String resultado = "";
+  double valorImc = 0;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -25,15 +37,26 @@ class _AdicionarImcPageState extends State<AdicionarImcPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(
-                    height: 200,
+                    height: 50,
+                  ),
+                  const Text(
+                    "Informe seu peso e sua altura para realizar o calculo do imc",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 100,
                   ),
                   TextField(
                     onChanged: (value) {
                       debugPrint(value);
                     },
+                    controller: pesoController,
+                    keyboardType: TextInputType.number,
                     style: const TextStyle(color: Colors.black),
                     decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.only(top: 0),
                         enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.black)),
                         focusedBorder: UnderlineInputBorder(
@@ -52,9 +75,10 @@ class _AdicionarImcPageState extends State<AdicionarImcPage> {
                     onChanged: (value) {
                       debugPrint(value);
                     },
+                    controller: alturaController,
+                    keyboardType: TextInputType.number,
                     style: const TextStyle(color: Colors.black),
                     decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.only(top: 0),
                         enabledBorder: UnderlineInputBorder(
                             borderSide: BorderSide(color: Colors.black)),
                         focusedBorder: UnderlineInputBorder(
@@ -76,13 +100,20 @@ class _AdicionarImcPageState extends State<AdicionarImcPage> {
                         backgroundColor:
                             MaterialStateProperty.all(Colors.black)),
                     onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const MainPage()));
+                      valorImc = widget.imcRepository.calcularIMC(
+                          double.parse(pesoController.text.replaceAll(",", ".")),
+                          double.parse(alturaController.text.replaceAll(",", ".")));
+                      resultado = widget.imcRepository.verificarResultadoIMC(valorImc);
+                      widget.imcRepository.adicionar(Imc(
+                          double.parse(pesoController.text.replaceAll(",", ".")),
+                          double.parse(alturaController.text.replaceAll(",", ".")),
+                          valorImc,
+                          resultado));
+                      widget.atualizarListaImc.call();
+                      Navigator.pop(context);
                     },
                     child: const Text(
-                      "Adicionar",
+                      "Calcular",
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
