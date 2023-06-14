@@ -11,7 +11,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  var imcRepository = ImcRepository();
+  late ImcRepository imcRepository;
   List<Imc> _imcs = [];
 
   @override
@@ -21,7 +21,14 @@ class _MainPageState extends State<MainPage> {
   }
 
   void obterImc() async {
-    _imcs = await imcRepository.listar();
+    imcRepository = await ImcRepository.load();
+    _imcs = await imcRepository.obterDados();
+    setState(() {});
+  }
+
+  void removerImc(Imc imc) async {
+    imcRepository.excluir(imc.id);
+    _imcs.remove(imc);
     setState(() {});
   }
 
@@ -42,39 +49,40 @@ class _MainPageState extends State<MainPage> {
               ),
               Expanded(
                 child: ListView.builder(
-                    itemCount: _imcs.length,
-                    itemBuilder: (BuildContext bc, int index) {
-                      var imc = _imcs[index];
-                      return Dismissible(
-                        onDismissed: (DismissDirection dismissDirection) async {
-                          await imcRepository.remove(imc.id);
-                          obterImc();
-                        },
-                        key: Key(imc.id),
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          child: ListTile(
-                              tileColor: imc.valorImc >= 24.9
-                                  ? const Color.fromARGB(255, 224, 123, 116)
-                                  : const Color.fromARGB(255, 136, 204, 138),
-                              title: Text(
-                                imc.resultado.toString(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 17),
-                              ),
-                              subtitle: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Peso: ${imc.peso.toString()} Kg"),
-                                  Text("Altura: ${imc.altura.toString()} m"),
-                                  Text(
-                                      "Valor do Imc: ${imc.valorImc.toStringAsFixed(2)}"),
-                                ],
-                              )),
+                  itemCount: _imcs.length,
+                  itemBuilder: (BuildContext bc, int index) {
+                    var imc = _imcs[index];
+                    return Dismissible(
+                      onDismissed: (DismissDirection dismissDirection) {
+                        removerImc(imc);
+                      },
+                      key: Key(imc.id),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        child: ListTile(
+                          tileColor: imc.valorImc >= 24.9
+                              ? const Color.fromARGB(255, 224, 123, 116)
+                              : const Color.fromARGB(255, 136, 204, 138),
+                          title: Text(
+                            imc.resultado.toString(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 17),
+                          ),
+                          subtitle: Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Peso: ${imc.peso.toString()} Kg"),
+                              Text("Altura: ${imc.altura.toString()} m"),
+                              Text(
+                                  "Valor do Imc: ${imc.valorImc.toStringAsFixed(2)}"),
+                            ],
+                          ),
                         ),
-                      );
-                    }),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),

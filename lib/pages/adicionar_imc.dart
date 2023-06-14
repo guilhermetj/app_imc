@@ -16,11 +16,12 @@ class AdicionarImcPage extends StatefulWidget {
   State<AdicionarImcPage> createState() => _AdicionarImcPageState();
 }
 
+
 class _AdicionarImcPageState extends State<AdicionarImcPage> {
+  
   TextEditingController alturaController = TextEditingController();
   TextEditingController pesoController = TextEditingController();
-  String resultado = "";
-  double valorImc = 0;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -49,25 +50,6 @@ class _AdicionarImcPageState extends State<AdicionarImcPage> {
                   const SizedBox(
                     height: 100,
                   ),
-                  TextField(
-                    onChanged: (value) {
-                      debugPrint(value);
-                    },
-                    controller: pesoController,
-                    keyboardType: TextInputType.number,
-                    style: const TextStyle(color: Colors.black),
-                    decoration: const InputDecoration(
-                        enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black)),
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.black)),
-                        hintText: "Peso",
-                        hintStyle: TextStyle(color: Colors.black),
-                        prefixIcon: Icon(
-                          Icons.line_weight,
-                          color: Colors.black,
-                        )),
-                  ),
                   const SizedBox(
                     height: 15,
                   ),
@@ -90,6 +72,26 @@ class _AdicionarImcPageState extends State<AdicionarImcPage> {
                           color: Colors.black,
                         )),
                   ),
+                  TextField(
+                    onChanged: (value) {
+                      debugPrint(value);
+                    },
+                    controller: pesoController,
+                    keyboardType: TextInputType.number,
+                    style: const TextStyle(color: Colors.black),
+                    decoration: const InputDecoration(
+                        enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black)),
+                        focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.black)),
+                        hintText: "Peso",
+                        hintStyle: TextStyle(color: Colors.black),
+                        prefixIcon: Icon(
+                          Icons.line_weight,
+                          color: Colors.black,
+                        )),
+                  ),
+                  
                   const SizedBox(
                     height: 15,
                   ),
@@ -100,15 +102,20 @@ class _AdicionarImcPageState extends State<AdicionarImcPage> {
                         backgroundColor:
                             MaterialStateProperty.all(Colors.black)),
                     onPressed: () {
-                      valorImc = widget.imcRepository.calcularIMC(
-                          double.parse(pesoController.text.replaceAll(",", ".")),
-                          double.parse(alturaController.text.replaceAll(",", ".")));
-                      resultado = widget.imcRepository.verificarResultadoIMC(valorImc);
-                      widget.imcRepository.adicionar(Imc(
-                          double.parse(pesoController.text.replaceAll(",", ".")),
-                          double.parse(alturaController.text.replaceAll(",", ".")),
-                          valorImc,
-                          resultado));
+                      
+                      var valorImc = widget.imcRepository.calcularIMC(
+                          double.parse(
+                              pesoController.text.replaceAll(",", ".")),
+                          double.parse(
+                              alturaController.text.replaceAll(",", ".")));
+                      var resultado =
+                          widget.imcRepository.verificarResultadoIMC(valorImc);
+                      var altura = double.parse(
+                              alturaController.text.replaceAll(",", "."));
+                      var peso = double.parse(
+                              pesoController.text.replaceAll(",", "."));
+                      widget.imcRepository.salvar(Imc.criar(peso, altura, valorImc, resultado));
+
                       widget.atualizarListaImc.call();
                       Navigator.pop(context);
                     },

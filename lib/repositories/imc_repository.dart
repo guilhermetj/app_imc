@@ -1,28 +1,39 @@
+import 'package:hive/hive.dart';
 import 'package:imcapp/model/imc.dart';
 
 class ImcRepository {
-  final List<Imc> _imcs = [];
+  static late Box _box;
+  ImcRepository();
 
-  Future<void> adicionar(Imc imc) async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    _imcs.add(imc);
+  static Future<ImcRepository> load() async {
+    if (Hive.isBoxOpen('imc')) {
+      _box = Hive.box('imc');
+    } else {
+      _box = await Hive.openBox('imc');
+    }
+    return ImcRepository();
   }
 
-  Future<void> alterar(String id, Imc imc) async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    Imc imcBanco = _imcs.where((imc) => imc.id == id).single;
-    imcBanco.altura = imc.altura;
-    imcBanco.peso = imc.peso;
+  void salvar(Imc imc) {
+    _box.add(imc);
   }
 
-  Future<void> remove(String id) async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    _imcs.remove(_imcs.where((imc) => imc.id == id).first);
+  void editar(Imc imc) {
+    final imcBanco = _box.values.firstWhere((x) => x.id == imc.id);
+    if (imcBanco != null) {
+      _box.put(imcBanco.key, imc);
+    }
   }
 
-  Future<List<Imc>> listar() async {
-    await Future.delayed(const Duration(milliseconds: 100));
-    return _imcs;
+  void excluir(String id) {
+    final imcBanco = _box.values.firstWhere((x) => x.id == id);
+    if (imcBanco != null) {
+      _box.delete(imcBanco.key);
+    }
+  }
+
+  dynamic obterDados() {
+    return _box.values.cast<Imc>().toList();
   }
 
   double calcularIMC(double peso, double altura) {
